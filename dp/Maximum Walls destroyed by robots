@@ -1,0 +1,50 @@
+class Solution {
+public:
+   int count(vector<int>&walls, int i , int j){
+    int low_bo = lower_bound(walls.begin(),walls.end(),i)- walls.begin();
+    int up_bo = upper_bound(walls.begin(),walls.end(),j) - walls.begin();
+    return up_bo-low_bo;
+   }
+
+
+
+    int solve(vector<int>&walls, vector<pair<int,int>>&roboDis,           vector<pair<int,int>>&range,int i,int dir, vector<vector<int>>&dp){
+        if(i==roboDis.size()) return 0;
+        if(dp[i][dir]!=-1) return dp[i][dir];
+        int left = range[i].first;
+       
+        if(dir==1 && i>0){
+            left = max(left,range[i-1].second+1);
+            
+        }
+
+        int right = range[i].second;
+ int leftTake = count(walls,left,roboDis[i].first)+solve(walls,roboDis,range,i+1,0,dp);
+int rightTake = count(walls,roboDis[i].first,range[i].second)+solve(walls,roboDis,range,i+1,1,dp);
+        return dp[i][dir]= max(leftTake,rightTake);
+
+    }
+    int maxWalls(vector<int>& robots, vector<int>& distance, vector<int>& walls) {
+            int n = robots.size();
+            vector<vector<int>>dp(n,vector<int>(2,-1));
+           vector<pair<int,int>>roboDis(n);
+           for(int i=0;i<n;i++){
+            roboDis[i] = {robots[i],distance[i]};
+           }
+             sort(roboDis.begin(),roboDis.end());
+             sort(walls.begin(),walls.end());
+           vector<pair<int,int>>range(n);
+           for(int i=0;i<n;i++){
+            int p = roboDis[i].first;
+            int d =  roboDis[i].second;
+            int leftlimit = (i == 0)?1:roboDis[i-1].first+1;
+            int rightlimit = (i==n-1)?1e9 :roboDis[i+1].first-1;
+            int l =max(leftlimit,p-d);
+            int r = min(rightlimit,p+d);
+            range[i]={l,r};
+           }
+
+           return solve(walls,roboDis,range,0,0,dp);
+
+    }
+};
